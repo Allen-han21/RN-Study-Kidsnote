@@ -214,11 +214,11 @@ React Native CLI 방식에서는 네이티브 코드를 Git에 포함해야 함.
 - [ ] Flexbox 레이아웃 연습
 - [ ] React Native StyleSheet vs CSS 비교
 
-### 개선 아이디어
-- [ ] 프로필 이미지 추가
-- [ ] 입력 검증 (빈 값 체크)
-- [ ] 저장 성공 Toast 메시지
-- [ ] AsyncStorage로 데이터 영속성
+### 개선 아이디어 (완료!)
+- [x] 프로필 이미지 추가 ✅
+- [x] 입력 검증 (빈 값 체크) ✅
+- [x] 저장 성공 Alert 메시지 ✅
+- [x] AsyncStorage로 데이터 영속성 ✅
 
 ---
 
@@ -227,6 +227,141 @@ React Native CLI 방식에서는 네이티브 코드를 Git에 포함해야 함.
 - [React Native 공식 문서](https://reactnative.dev/docs/getting-started)
 - [React Hooks - useState](https://react.dev/reference/react/useState)
 - [TypeScript React Native](https://reactnative.dev/docs/typescript)
+
+---
+
+## 🎯 Week 01 개선사항 (2025-11-10)
+
+### 추가된 기능들
+
+#### 1. 프로필 아바타
+```typescript
+{/* 프로필 이미지 */}
+<View style={styles.avatarContainer}>
+  <View style={styles.avatar}>
+    <Text style={styles.avatarText}>
+      {profile.name.charAt(0).toUpperCase()}
+    </Text>
+  </View>
+</View>
+```
+- 원형 아바타 (100x100)
+- 이름의 첫 글자 자동 표시
+- iOS 블루 컬러 (#007AFF)
+- 그림자 효과
+
+#### 2. 입력 검증 (Validation)
+```typescript
+const validateProfile = (data: ProfileData): ValidationErrors => {
+  const newErrors: ValidationErrors = {};
+
+  // 이름: 2-20자
+  if (!data.name.trim()) {
+    newErrors.name = '이름을 입력해주세요';
+  } else if (data.name.trim().length < 2) {
+    newErrors.name = '이름은 2자 이상이어야 합니다';
+  } else if (data.name.trim().length > 20) {
+    newErrors.name = '이름은 20자 이하여야 합니다';
+  }
+
+  // 직업: 2-30자
+  // 소개: 10-200자
+  // ...
+
+  return newErrors;
+};
+```
+
+**검증 규칙:**
+- 이름: 2-20자 (필수)
+- 직업: 2-30자 (필수)
+- 소개: 10-200자 (필수)
+
+**UX 피드백:**
+- 검증 실패 시 빨간 테두리 (borderColor: #FF3B30)
+- 각 필드 아래 에러 메시지 표시
+- 저장 불가 (검증 통과 필요)
+
+#### 3. AsyncStorage 데이터 영속성
+```typescript
+// 패키지 설치
+npm install @react-native-async-storage/async-storage
+cd ios && pod install
+
+// 앱 시작 시 데이터 불러오기
+useEffect(() => {
+  loadProfile();
+}, []);
+
+const loadProfile = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+    if (jsonValue != null) {
+      const loadedProfile = JSON.parse(jsonValue);
+      setProfile(loadedProfile);
+      setTempProfile(loadedProfile);
+    }
+  } catch (e) {
+    console.error('프로필 불러오기 실패:', e);
+  }
+};
+
+// 저장 시 AsyncStorage에 저장
+const saveProfile = async (profileData: ProfileData) => {
+  try {
+    const jsonValue = JSON.stringify(profileData);
+    await AsyncStorage.setItem(STORAGE_KEY, jsonValue);
+  } catch (e) {
+    console.error('프로필 저장 실패:', e);
+    Alert.alert('저장 실패', '프로필 저장 중 오류가 발생했습니다.');
+  }
+};
+```
+
+**동작 방식:**
+- 앱 시작 시 저장된 프로필 자동 로드
+- 저장 버튼 클릭 시 AsyncStorage에 저장
+- 앱 재시작 후에도 데이터 유지
+
+#### 4. 저장 성공 Alert
+```typescript
+Alert.alert('저장 완료', '프로필이 성공적으로 저장되었습니다.', [
+  {text: '확인'},
+]);
+```
+
+### 트러블슈팅
+
+#### AsyncStorage 네이티브 모듈 에러
+**문제:**
+```
+[@RNC/AsyncStorage]: NativeModule: AsyncStorage is null.
+```
+
+**원인:**
+네이티브 모듈 추가 후 JavaScript 리로드만으로는 불충분. 네이티브 코드 재컴파일 필요.
+
+**해결:**
+```bash
+npx react-native run-ios
+```
+
+### 학습 포인트
+
+1. **React Native 네이티브 모듈**
+   - JavaScript 라이브러리만으로 해결 불가능한 기능 (파일 저장, 카메라 등)
+   - CocoaPods로 iOS 네이티브 모듈 설치
+   - 설치 후 반드시 네이티브 빌드 필요
+
+2. **폼 검증 패턴**
+   - Controlled Components + 검증 함수
+   - 에러 상태 관리 (ValidationErrors)
+   - 조건부 스타일링 (inputError)
+
+3. **AsyncStorage vs UserDefaults**
+   - AsyncStorage: React Native의 key-value 저장소
+   - UserDefaults: iOS 네이티브의 key-value 저장소
+   - 둘 다 간단한 데이터 저장에 적합
 
 ---
 
