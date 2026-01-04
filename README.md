@@ -172,4 +172,32 @@ This project is for educational purposes only.
 
 ---
 
+## 🤖 Claude Code Integration
+
+이 프로젝트는 **Claude Code**를 활용하여 개발 워크플로우를 개선합니다.
+
+### PR 자동 생성 테스트
+
+Claude Code의 `gh` CLI 통합을 활용한 Pull Request 자동 생성 기능을 테스트합니다.
+
+**테스트 시나리오:**
+- ✅ 브랜치 자동 생성
+- ✅ 변경사항 자동 분석
+- ✅ PR 설명 자동 작성
+- ✅ GitHub PR 생성
+
+**사용 예시:**
+```bash
+# Claude Code에서
+"Create a pull request for this feature"
+
+# Claude가 자동으로:
+# 1. git status, git diff 분석
+# 2. 전체 커밋 히스토리 검토
+# 3. 의미 있는 PR 요약 생성
+# 4. gh pr create 실행
+```
+
+---
+
 **Made with ❤️ by iOS Developers learning React Native**
